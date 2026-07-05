@@ -22,6 +22,11 @@ type Lead = {
 export default function AdminLeads() {
   const [leads, setLeads] = useState<Lead[]>([]);
   const [loading, setLoading] = useState(true);
+  const [expandedMessages, setExpandedMessages] = useState<Record<string, boolean>>({});
+
+  const toggleMessage = (id: string) => {
+    setExpandedMessages(prev => ({ ...prev, [id]: !prev[id] }));
+  };
 
   useEffect(() => {
     fetchLeads();
@@ -99,8 +104,32 @@ export default function AdminLeads() {
                       <Link href={`/property/${lead.property_id}`} target="_blank" className="text-sm text-accent hover:underline line-clamp-1">
                         {lead.properties?.title || 'Propiedad Eliminada'}
                       </Link>
-                      <div className="mt-2 text-xs text-primary-600 dark:text-primary-300 p-2 bg-primary-50 dark:bg-primary-900 rounded border border-primary-100 dark:border-primary-800">
-                        {lead.message}
+                      <div className="mt-2">
+                        {/* Mobile View */}
+                        <div className="md:hidden">
+                          {expandedMessages[lead.id] ? (
+                            <div className="text-xs text-primary-600 dark:text-primary-300 p-2 bg-primary-50 dark:bg-primary-900 rounded border border-primary-100 dark:border-primary-800">
+                              <p>{lead.message}</p>
+                              <button onClick={() => toggleMessage(lead.id)} className="mt-2 text-accent font-medium hover:underline flex items-center gap-1">
+                                Ocultar mensaje
+                              </button>
+                            </div>
+                          ) : (
+                            <button 
+                              onClick={() => toggleMessage(lead.id)} 
+                              className="text-xs px-3 py-1.5 bg-primary-100 dark:bg-primary-800 text-primary-700 dark:text-primary-200 rounded-md hover:bg-primary-200 dark:hover:bg-primary-700 font-medium flex items-center gap-1"
+                            >
+                              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-3.5 h-3.5">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M2.167 15.418L2 15.5m0 0l2.167-1.167M2 15.5V5.5A1.5 1.5 0 013.5 4h17A1.5 1.5 0 0122 5.5v10a1.5 1.5 0 01-1.5 1.5h-17a1.5 1.5 0 01-1.333-.918z" />
+                              </svg>
+                              Leer mensaje
+                            </button>
+                          )}
+                        </div>
+                        {/* Desktop View */}
+                        <div className="hidden md:block text-xs text-primary-600 dark:text-primary-300 p-2 bg-primary-50 dark:bg-primary-900 rounded border border-primary-100 dark:border-primary-800">
+                          {lead.message}
+                        </div>
                       </div>
                     </td>
                     <td className="p-4">
