@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
+import BackButton from '@/components/BackButton';
 
 export default function AdminLogin() {
   const [email, setEmail] = useState('');
@@ -32,7 +33,10 @@ export default function AdminLogin() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background px-4">
-      <div className="max-w-md w-full bg-white dark:bg-primary-950 p-8 rounded-lg shadow-xl border border-primary-100 dark:border-primary-900">
+      <div className="max-w-md w-full bg-white dark:bg-primary-950 p-8 rounded-lg shadow-xl border border-primary-100 dark:border-primary-900 relative">
+        <div className="absolute -top-16 left-0">
+          <BackButton fallback="/" />
+        </div>
         <div className="text-center mb-8">
           <h2 className="text-2xl font-bold text-primary-900 dark:text-white">Acceso Administrador</h2>
           <p className="text-primary-600 dark:text-primary-400 mt-2">Ingresa con tus credenciales de inmobiliaria</p>
