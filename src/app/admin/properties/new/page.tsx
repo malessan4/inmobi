@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
+import { toast } from 'react-hot-toast';
 
 export default function NewProperty() {
   const router = useRouter();
@@ -76,10 +77,11 @@ export default function NewProperty() {
       ]);
 
       if (error) throw error;
+      toast.success('Propiedad publicada correctamente');
       router.push('/admin');
 
     } catch (error: any) {
-      alert('Error al crear la propiedad: ' + error.message);
+      toast.error('Error al crear la propiedad: ' + error.message);
     } finally {
       setLoading(false);
     }

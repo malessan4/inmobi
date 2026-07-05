@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import Link from 'next/link';
+import { toast } from 'react-hot-toast';
 
 type Property = {
   id: string;
@@ -38,12 +39,38 @@ export default function AdminDashboard() {
     fetchProperties();
   }
 
-  async function deleteProperty(id: string) {
-    if (confirm('¿Estás seguro de que quieres eliminar esta propiedad?')) {
-      await supabase.from('properties').delete().eq('id', id);
-      fetchProperties();
-    }
-  }
+  const deleteProperty = async (id: string) => {
+    toast((t) => (
+      <div className="p-2">
+        <p className="font-bold text-sm text-gray-900 mb-4">¿Estás seguro de que quieres eliminar esta propiedad?</p>
+        <div className="flex justify-end gap-2">
+          <button 
+            type="button"
+            onClick={() => toast.dismiss(t.id)} 
+            className="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 rounded text-xs font-medium text-gray-800 transition-colors"
+          >
+            Cancelar
+          </button>
+          <button 
+            type="button"
+            onClick={async () => {
+              toast.dismiss(t.id);
+              const { error } = await supabase.from('properties').delete().eq('id', id);
+              if (error) {
+                toast.error('Error al eliminar: ' + error.message);
+              } else {
+                toast.success('Propiedad eliminada correctamente');
+                fetchProperties();
+              }
+            }} 
+            className="px-3 py-1.5 bg-red-500 hover:bg-red-600 rounded text-xs font-medium text-white transition-colors"
+          >
+            Sí, eliminar
+          </button>
+        </div>
+      </div>
+    ), { duration: Infinity, position: 'top-center' });
+  };
 
   return (
     <div>

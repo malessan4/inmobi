@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useRouter, useParams } from 'next/navigation';
+import { toast } from 'react-hot-toast';
 
 export default function EditProperty() {
   const { id } = useParams<{ id: string }>();
@@ -69,11 +70,33 @@ export default function EditProperty() {
   };
 
   const deleteExistingImage = (index: number) => {
-    if (confirm('¿Eliminar esta imagen?')) {
-      const updatedImages = [...existingImages];
-      updatedImages.splice(index, 1);
-      setExistingImages(updatedImages);
-    }
+    toast((t) => (
+      <div className="p-2">
+        <p className="font-bold text-sm text-gray-900 mb-4">¿Estás seguro de eliminar esta imagen?</p>
+        <div className="flex justify-end gap-2">
+          <button 
+            type="button"
+            onClick={() => toast.dismiss(t.id)} 
+            className="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 rounded text-xs font-medium text-gray-800 transition-colors"
+          >
+            Cancelar
+          </button>
+          <button 
+            type="button"
+            onClick={() => {
+              const updatedImages = [...existingImages];
+              updatedImages.splice(index, 1);
+              setExistingImages(updatedImages);
+              toast.dismiss(t.id);
+              toast.success('Imagen borrada (Recuerda guardar los cambios)');
+            }} 
+            className="px-3 py-1.5 bg-red-500 hover:bg-red-600 rounded text-xs font-medium text-white transition-colors"
+          >
+            Sí, eliminar
+          </button>
+        </div>
+      </div>
+    ), { duration: Infinity, position: 'top-center' });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -117,10 +140,11 @@ export default function EditProperty() {
       }).eq('id', id);
 
       if (error) throw error;
+      toast.success('Propiedad actualizada correctamente');
       router.push('/admin');
 
     } catch (error: any) {
-      alert('Error al actualizar la propiedad: ' + error.message);
+      toast.error('Error al actualizar la propiedad: ' + error.message);
     } finally {
       setLoading(false);
     }
