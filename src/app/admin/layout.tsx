@@ -23,7 +23,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     checkUser();
     
     const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
-      if (!session && pathname !== '/admin/login') {
+      if (event === 'SIGNED_OUT') {
+        router.push('/');
+      } else if (!session && pathname !== '/admin/login') {
         router.push('/admin/login');
       }
     });
@@ -44,17 +46,32 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     <div className="min-h-screen flex bg-background">
       {/* Sidebar */}
       <aside className="w-64 bg-primary-950 text-white flex flex-col hidden md:flex">
-        <div className="h-16 flex items-center px-6 font-bold text-xl border-b border-primary-800">
-          CRM<span className="text-primary-400 font-light">Admin</span>
+        <div className="h-16 flex items-center px-6 font-bold text-xl border-b border-primary-800 gap-2">
+          <img src="/logo.jpg" alt="Logo" className="w-6 h-6 rounded-sm object-cover" />
+          <span>Inmobi<span className="text-primary-400 font-light">out</span></span>
         </div>
-        <nav className="flex-1 py-6 px-4 space-y-2">
-          <Link href="/admin" className="block px-4 py-3 rounded bg-primary-800 text-white font-medium">
-            Propiedades
-          </Link>
-          <Link href="/" className="block px-4 py-3 rounded hover:bg-primary-900 text-primary-200 font-medium">
-            Volver al portal web
-          </Link>
-        </nav>
+          <nav className="flex-1 py-6 px-4 space-y-2">
+            <Link 
+              href="/admin" 
+              className={`block px-4 py-3 rounded-lg font-medium transition-colors ${
+                pathname === '/admin' || pathname.startsWith('/admin/properties') 
+                  ? 'bg-accent text-white shadow-md' 
+                  : 'text-primary-600 dark:text-primary-400 hover:bg-primary-100 dark:hover:bg-primary-800'
+              }`}
+            >
+              🏢 Propiedades
+            </Link>
+            <Link 
+              href="/admin/leads" 
+              className={`block px-4 py-3 rounded-lg font-medium transition-colors ${
+                pathname.startsWith('/admin/leads')
+                  ? 'bg-accent text-white shadow-md' 
+                  : 'text-primary-600 dark:text-primary-400 hover:bg-primary-100 dark:hover:bg-primary-800'
+              }`}
+            >
+              👥 Mis Contactos
+            </Link>
+          </nav>
         <div className="p-4 border-t border-primary-800">
           <button 
             onClick={() => supabase.auth.signOut()}
@@ -68,7 +85,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       {/* Main Content */}
       <main className="flex-1 flex flex-col overflow-hidden bg-background transition-colors">
         <header className="h-16 bg-white dark:bg-primary-900 border-b border-primary-100 dark:border-primary-800 flex items-center justify-between px-8">
-            <div className="font-bold text-xl dark:text-white md:hidden">CRM Admin</div>
+            <div className="font-bold text-xl dark:text-white md:hidden">Inmobiout</div>
             <div className="hidden md:block"></div>
             <div className="flex items-center space-x-4">
               <ThemeToggle />

@@ -1,6 +1,8 @@
 import { supabase } from '@/lib/supabase';
 import Navbar from '@/components/Navbar';
 import Link from 'next/link';
+import ContactForm from '@/components/ContactForm';
+import BackButton from '@/components/BackButton';
 
 export const revalidate = 0;
 
@@ -32,9 +34,7 @@ export default async function PropertyDetails({ params }: { params: Promise<{ id
       <Navbar />
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 w-full">
-        <Link href="/" className="inline-flex items-center text-primary-600 hover:text-accent mb-8 font-medium">
-          ← Volver a resultados
-        </Link>
+        <BackButton fallback="/" />
         
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
           {/* Images Section */}
@@ -121,13 +121,7 @@ export default async function PropertyDetails({ params }: { params: Promise<{ id
               </p>
             </div>
             
-            <div className="bg-primary-50 dark:bg-primary-900 p-6 rounded-xl">
-              <h3 className="text-lg font-bold text-primary-900 dark:text-white mb-2">¿Te interesa esta propiedad?</h3>
-              <p className="text-primary-600 dark:text-primary-400 mb-6">Contacta a la inmobiliaria para coordinar una visita o hacer una consulta.</p>
-              <button className="w-full py-4 bg-accent hover:bg-accent-hover text-white font-bold rounded-lg transition-colors">
-                Contactar Inmobiliaria
-              </button>
-            </div>
+            <ContactForm propertyId={property.id} />
           </div>
         </div>
       </div>
