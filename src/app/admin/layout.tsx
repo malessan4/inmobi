@@ -8,6 +8,7 @@ import ThemeToggle from '@/components/ThemeToggle';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
 
@@ -83,16 +84,57 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 flex flex-col overflow-hidden bg-background transition-colors">
-        <header className="h-16 bg-white dark:bg-primary-900 border-b border-primary-100 dark:border-primary-800 flex items-center justify-between px-8">
-            <div className="font-bold text-xl dark:text-white md:hidden">Inmobiout</div>
+      <main className="flex-1 flex flex-col overflow-hidden bg-background transition-colors h-screen">
+        <header className="h-16 bg-white dark:bg-primary-900 border-b border-primary-100 dark:border-primary-800 flex items-center justify-between px-4 sm:px-8 relative z-20">
+            <div className="flex items-center gap-3">
+              <button 
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                className="md:hidden p-2 text-primary-600 dark:text-primary-300"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+                </svg>
+              </button>
+              <div className="font-bold text-xl dark:text-white md:hidden">Inmobiout</div>
+            </div>
             <div className="hidden md:block"></div>
             <div className="flex items-center space-x-4">
               <ThemeToggle />
-              <button onClick={() => supabase.auth.signOut()} className="text-red-500 md:hidden">Salir</button>
+              <button onClick={() => supabase.auth.signOut()} className="text-red-500 md:hidden font-medium">Salir</button>
             </div>
         </header>
-        <div className="flex-1 overflow-auto p-8">
+
+        {/* Mobile Menu Dropdown */}
+        {isMobileMenuOpen && (
+          <div className="md:hidden absolute top-16 left-0 w-full bg-white dark:bg-primary-900 border-b border-primary-100 dark:border-primary-800 shadow-lg z-10">
+            <nav className="flex flex-col p-4 space-y-2">
+              <Link 
+                href="/admin" 
+                onClick={() => setIsMobileMenuOpen(false)}
+                className={`block px-4 py-3 rounded-lg font-medium transition-colors ${
+                  pathname === '/admin' || pathname.startsWith('/admin/properties') 
+                    ? 'bg-accent text-white shadow-md' 
+                    : 'text-primary-600 dark:text-primary-400 hover:bg-primary-100 dark:hover:bg-primary-800'
+                }`}
+              >
+                🏢 Propiedades
+              </Link>
+              <Link 
+                href="/admin/leads" 
+                onClick={() => setIsMobileMenuOpen(false)}
+                className={`block px-4 py-3 rounded-lg font-medium transition-colors ${
+                  pathname.startsWith('/admin/leads')
+                    ? 'bg-accent text-white shadow-md' 
+                    : 'text-primary-600 dark:text-primary-400 hover:bg-primary-100 dark:hover:bg-primary-800'
+                }`}
+              >
+                👥 Mis Contactos
+              </Link>
+            </nav>
+          </div>
+        )}
+
+        <div className="flex-1 overflow-auto p-4 sm:p-8">
           {children}
         </div>
       </main>

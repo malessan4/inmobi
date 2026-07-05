@@ -87,7 +87,7 @@ export default function AdminDashboard() {
         </Link>
       </div>
 
-      <div className="bg-white dark:bg-primary-950 rounded-lg shadow-sm border border-primary-100 dark:border-primary-900 overflow-hidden">
+      <div className="bg-white dark:bg-primary-950 rounded-lg shadow-sm border border-primary-100 dark:border-primary-900 overflow-hidden overflow-x-auto">
         {loading ? (
           <div className="p-8 text-center text-primary-500">Cargando propiedades...</div>
         ) : properties.length === 0 ? (
@@ -98,7 +98,7 @@ export default function AdminDashboard() {
             </Link>
           </div>
         ) : (
-          <table className="w-full text-left border-collapse">
+          <table className="w-full text-left border-collapse min-w-[600px]">
             <thead>
               <tr className="bg-primary-50 dark:bg-primary-900 border-b border-primary-100 dark:border-primary-800 text-primary-700 dark:text-primary-200">
                 <th className="p-4 font-semibold text-sm">Título</th>
