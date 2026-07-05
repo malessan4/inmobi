@@ -1,4 +1,22 @@
+'use client';
+
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+
 export default function Hero() {
+  const router = useRouter();
+  const [query, setQuery] = useState('');
+  const [operation, setOperation] = useState('venta');
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    const params = new URLSearchParams();
+    if (query) params.append('q', query);
+    if (operation) params.append('op', operation);
+    
+    router.push(`/search?${params.toString()}`);
+  };
+
   return (
     <div className="relative bg-primary-900 overflow-hidden">
       <div className="absolute inset-0">
@@ -19,21 +37,26 @@ export default function Hero() {
           Explora miles de propiedades en venta y alquiler de las mejores inmobiliarias.
         </p>
         
-        {/* Search Bar Stub */}
-        <div className="w-full max-w-3xl bg-white dark:bg-primary-950 p-2 rounded-lg shadow-xl flex flex-col md:flex-row gap-2">
+        <form onSubmit={handleSearch} className="w-full max-w-3xl bg-white dark:bg-primary-950 p-2 rounded-lg shadow-xl flex flex-col md:flex-row gap-2">
           <input 
             type="text" 
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
             placeholder="Buscar por ciudad, barrio o dirección..."
             className="flex-grow px-4 py-3 rounded-md bg-transparent text-primary-900 dark:text-white border-0 focus:ring-2 focus:ring-primary-500 placeholder-primary-400 outline-none"
           />
-          <select className="px-4 py-3 rounded-md bg-primary-50 dark:bg-primary-900 text-primary-900 dark:text-white border-0 outline-none cursor-pointer">
-            <option>Comprar</option>
-            <option>Alquilar</option>
+          <select 
+            value={operation}
+            onChange={(e) => setOperation(e.target.value)}
+            className="px-4 py-3 rounded-md bg-primary-50 dark:bg-primary-900 text-primary-900 dark:text-white border-0 outline-none cursor-pointer"
+          >
+            <option value="venta">Comprar</option>
+            <option value="alquiler">Alquilar</option>
           </select>
-          <button className="px-8 py-3 bg-accent hover:bg-accent-hover text-white font-semibold rounded-md transition-colors">
+          <button type="submit" className="px-8 py-3 bg-accent hover:bg-accent-hover text-white font-semibold rounded-md transition-colors">
             Buscar
           </button>
-        </div>
+        </form>
       </div>
     </div>
   );
