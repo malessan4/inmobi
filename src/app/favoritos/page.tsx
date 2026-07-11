@@ -1,59 +1,83 @@
+'use client';
+
+import { useEffect, useState } from 'react';
 import Navbar from '@/components/Navbar';
-import Hero from '@/components/Hero';
-import { supabase } from '@/lib/supabase';
-import Image from 'next/image';
 import Link from 'next/link';
-import FilterBar from '@/components/FilterBar';
+import { supabase } from '@/lib/supabase';
 import FavoriteButton from '@/components/FavoriteButton';
 
-export const revalidate = 0; // Disable cache for MVP so new properties show up immediately
+export default function FavoritosPage() {
+  const [properties, setProperties] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-export default async function Home(props: { searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) {
-  const searchParams = await props.searchParams;
-  const q = typeof searchParams.q === 'string' ? searchParams.q : '';
-  const operation = typeof searchParams.operation === 'string' ? searchParams.operation : '';
-  const propertyType = typeof searchParams.type === 'string' ? searchParams.type : '';
+  useEffect(() => {
+    fetchFavorites();
 
-  let query = supabase
-    .from('properties')
-    .select('*')
-    .eq('is_published', true);
+    // Listen for changes if they remove a favorite while on this page
+    const handleFavoritesUpdate = () => {
+      fetchFavorites();
+    };
 
-  if (q) {
-    query = query.or(`title.ilike.%${q}%,city.ilike.%${q}%,address.ilike.%${q}%`);
-  }
-  if (operation) {
-    query = query.eq('operation_type', operation);
-  }
-  if (propertyType) {
-    query = query.eq('property_type', propertyType);
-  }
+    window.addEventListener('favoritesUpdated', handleFavoritesUpdate);
+    return () => window.removeEventListener('favoritesUpdated', handleFavoritesUpdate);
+  }, []);
 
-  const { data: properties } = await query.order('created_at', { ascending: false });
+  const fetchFavorites = async () => {
+    setLoading(true);
+    try {
+      const favoritesIds = JSON.parse(localStorage.getItem('favorites') || '[]');
+      
+      if (favoritesIds.length === 0) {
+        setProperties([]);
+        setLoading(false);
+        return;
+      }
+
+      const { data } = await supabase
+        .from('properties')
+        .select('*')
+        .in('id', favoritesIds)
+        .eq('is_published', true);
+
+      if (data) {
+        setProperties(data);
+      }
+    } catch (error) {
+      console.error('Error fetching favorites:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <main className="flex min-h-screen flex-col bg-background">
       <Navbar />
-      <Hero />
       
-      <section className="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
-        <div className="flex justify-between items-end mb-12">
-          <div>
-            <h2 className="text-3xl font-bold text-primary-900 dark:text-white">Propiedades Destacadas</h2>
-            <p className="mt-2 text-primary-600 dark:text-primary-300">Descubre las mejores oportunidades del mercado</p>
-          </div>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 w-full">
+        <div className="mb-8 border-b border-primary-200 dark:border-primary-800 pb-4">
+          <h1 className="text-3xl font-bold text-primary-900 dark:text-white">Mis Favoritos</h1>
+          <p className="text-primary-600 dark:text-primary-400 mt-2">
+            Propiedades que has guardado para ver más tarde.
+          </p>
         </div>
 
-        <FilterBar />
-        
-        {(!properties || properties.length === 0) ? (
-          <div className="text-center p-10 border border-primary-200 dark:border-primary-800 rounded-lg text-primary-500">
-            Aún no hay propiedades publicadas.
+        {loading ? (
+          <div className="text-center py-20 text-primary-500">
+            Cargando tus propiedades favoritas...
+          </div>
+        ) : properties.length === 0 ? (
+          <div className="text-center py-20 bg-white dark:bg-primary-950 rounded-xl border border-primary-100 dark:border-primary-900 shadow-sm">
+            <span className="text-4xl block mb-4">💔</span>
+            <h3 className="text-xl font-bold text-primary-900 dark:text-white mb-2">Aún no tienes favoritos</h3>
+            <p className="text-primary-500 mb-6">Explora nuestro catálogo y guarda las propiedades que más te gusten.</p>
+            <Link href="/" className="px-6 py-2 bg-accent hover:bg-accent-hover text-white font-medium rounded-md transition-colors inline-block">
+              Ver Propiedades
+            </Link>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {properties.map((property) => (
-              <Link href={`/property/${property.id}`} key={property.id} className="bg-white dark:bg-primary-950 rounded-xl shadow-md overflow-hidden border border-primary-100 dark:border-primary-900 hover:shadow-lg transition-shadow group cursor-pointer block">
+              <Link href={`/property/${property.id}`} key={property.id} className="bg-white dark:bg-primary-950 rounded-xl shadow-md overflow-hidden border border-primary-100 dark:border-primary-900 hover:shadow-lg transition-shadow group cursor-pointer block relative">
                 <div className="relative h-64 w-full bg-primary-100 dark:bg-primary-900 overflow-hidden">
                   {property.image_urls && property.image_urls.length > 0 ? (
                     <img 
@@ -105,7 +129,7 @@ export default async function Home(props: { searchParams: Promise<{ [key: string
             ))}
           </div>
         )}
-      </section>
+      </div>
     </main>
   );
 }

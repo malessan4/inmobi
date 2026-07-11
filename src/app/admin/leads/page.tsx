@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import Link from 'next/link';
 import { toast } from 'react-hot-toast';
+import BackButton from '@/components/BackButton';
 
 type Lead = {
   id: string;
@@ -65,7 +66,8 @@ export default function AdminLeads() {
     <div className="max-w-6xl mx-auto">
       <div className="flex justify-between items-center mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-primary-900 dark:text-white">Mis Contactos</h1>
+          <BackButton fallback="/admin" />
+          <h1 className="text-3xl font-bold text-primary-900 dark:text-white mt-4">Mis Contactos</h1>
           <p className="text-primary-600 dark:text-primary-400 mt-1">
             Gestiona los clientes interesados en tus propiedades.
           </p>

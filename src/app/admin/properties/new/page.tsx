@@ -4,6 +4,8 @@ import { useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-hot-toast';
+import imageCompression from 'browser-image-compression';
+import BackButton from '@/components/BackButton';
 
 export default function NewProperty() {
   const router = useRouter();
@@ -41,13 +43,21 @@ export default function NewProperty() {
       // 1. Upload Images
       const uploadedUrls: string[] = [];
       for (const file of images) {
-        const fileExt = file.name.split('.').pop();
+        // Compress the image
+        const options = {
+          maxSizeMB: 0.8, // Maximum 800KB
+          maxWidthOrHeight: 1920, // Max 1080p resolution
+          useWebWorker: true,
+        };
+        const compressedFile = await imageCompression(file, options);
+
+        const fileExt = compressedFile.name.split('.').pop() || 'jpg';
         const fileName = `${Math.random().toString(36).substring(2, 15)}_${Date.now()}.${fileExt}`;
         const filePath = `properties/${fileName}`;
 
         const { error: uploadError } = await supabase.storage
           .from('property-images')
-          .upload(filePath, file);
+          .upload(filePath, compressedFile);
 
         if (uploadError) throw uploadError;
 
@@ -90,7 +100,8 @@ export default function NewProperty() {
   return (
     <div className="max-w-4xl mx-auto pb-12">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-primary-900 dark:text-white">Nueva Propiedad</h1>
+        <BackButton fallback="/admin" />
+        <h1 className="text-3xl font-bold text-primary-900 dark:text-white mt-4">Nueva Propiedad</h1>
         <p className="text-primary-600 dark:text-primary-400 mt-1">Completa los datos para publicar una casa o departamento.</p>
       </div>
 

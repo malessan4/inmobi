@@ -3,6 +3,9 @@ import Navbar from '@/components/Navbar';
 import Link from 'next/link';
 import ContactForm from '@/components/ContactForm';
 import BackButton from '@/components/BackButton';
+import WhatsAppButton from '@/components/WhatsAppButton';
+import ImageGallery from '@/components/ImageGallery';
+import FavoriteButton from '@/components/FavoriteButton';
 
 export const revalidate = 0;
 
@@ -38,46 +41,17 @@ export default async function PropertyDetails({ params }: { params: Promise<{ id
         
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
           {/* Images Section */}
-          <div className="space-y-4">
-            {property.image_urls && property.image_urls.length > 0 ? (
-              <>
-                <div className="relative h-96 w-full rounded-xl overflow-hidden bg-primary-100">
-                  <img 
-                    src={property.image_urls[0]} 
-                    alt="Imagen principal" 
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute top-4 left-4">
-                    <span className={`px-4 py-2 rounded-full text-sm font-bold uppercase tracking-wider ${
-                      property.operation_type === 'venta' 
-                        ? 'bg-green-500 text-white' 
-                        : 'bg-blue-500 text-white'
-                    }`}>
-                      {property.operation_type}
-                    </span>
-                  </div>
-                </div>
-                {property.image_urls.length > 1 && (
-                  <div className="grid grid-cols-4 gap-4">
-                    {property.image_urls.slice(1).map((url: string, index: number) => (
-                      <div key={index} className="h-24 rounded-lg overflow-hidden bg-primary-100">
-                        <img src={url} alt={`Imagen ${index + 2}`} className="w-full h-full object-cover" />
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </>
-            ) : (
-              <div className="h-96 rounded-xl bg-primary-100 flex items-center justify-center text-primary-400">
-                Sin imágenes disponibles
-              </div>
-            )}
+          <div className="w-full">
+            <ImageGallery images={property.image_urls || []} operationType={property.operation_type} />
           </div>
 
           {/* Details Section */}
           <div>
             <div className="mb-6">
-              <p className="text-accent font-semibold uppercase tracking-wider mb-2">{property.property_type}</p>
+              <div className="flex justify-between items-start">
+                <p className="text-accent font-semibold uppercase tracking-wider mb-2">{property.property_type}</p>
+                <FavoriteButton propertyId={property.id} />
+              </div>
               <h1 className="text-3xl md:text-4xl font-bold text-primary-900 dark:text-white mb-4">
                 {property.title}
               </h1>
@@ -125,6 +99,7 @@ export default async function PropertyDetails({ params }: { params: Promise<{ id
           </div>
         </div>
       </div>
+      <WhatsAppButton propertyTitle={property.title} />
     </main>
   );
 }
