@@ -36,7 +36,8 @@ export default function AdminDashboard() {
 
     const { count } = await supabase
       .from('leads')
-      .select('*', { count: 'exact', head: true });
+      .select('*', { count: 'exact', head: true })
+      .in('status', ['nuevo', 'contactado']);
       
     if (count !== null) setLeadsCount(count);
 
@@ -107,7 +108,7 @@ export default function AdminDashboard() {
             <p className="text-4xl font-bold text-green-600 dark:text-green-400">{properties.filter(p => p.is_published).length}</p>
           </div>
           <div className="bg-white dark:bg-primary-950 p-6 rounded-lg shadow-sm border border-primary-100 dark:border-primary-900">
-            <p className="text-primary-500 text-sm font-semibold uppercase tracking-wider mb-1">Total Leads (Contactos)</p>
+            <p className="text-primary-500 text-sm font-semibold uppercase tracking-wider mb-1">Contactos Pendientes</p>
             <p className="text-4xl font-bold text-accent">{leadsCount}</p>
           </div>
         </div>
