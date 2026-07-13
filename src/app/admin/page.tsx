@@ -25,8 +25,8 @@ export default function AdminDashboard() {
     fetchProperties();
   }, []);
 
-  async function fetchProperties() {
-    setLoading(true);
+  async function fetchProperties(showLoading = true) {
+    if (showLoading) setLoading(true);
     const { data, error } = await supabase
       .from('properties')
       .select('*')
@@ -41,12 +41,15 @@ export default function AdminDashboard() {
       
     if (count !== null) setLeadsCount(count);
 
-    setLoading(false);
+    if (showLoading) setLoading(false);
   }
 
   async function togglePublish(id: string, currentStatus: boolean) {
+    // Optimistic update to prevent UI flicker
+    setProperties(prev => prev.map(p => p.id === id ? { ...p, is_published: !currentStatus } : p));
+    
+    // Background update
     await supabase.from('properties').update({ is_published: !currentStatus }).eq('id', id);
-    fetchProperties();
   }
 
   const deleteProperty = async (id: string) => {
@@ -70,7 +73,7 @@ export default function AdminDashboard() {
                 toast.error('Error al eliminar: ' + error.message);
               } else {
                 toast.success('Propiedad eliminada correctamente');
-                fetchProperties();
+                fetchProperties(false);
               }
             }} 
             className="px-3 py-1.5 bg-red-500 hover:bg-red-600 rounded text-xs font-medium text-white transition-colors"
