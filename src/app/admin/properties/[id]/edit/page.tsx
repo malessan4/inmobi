@@ -29,6 +29,7 @@ export default function EditProperty() {
     bathrooms: '',
     city: '',
     address: '',
+    is_published: true,
   });
 
   useEffect(() => {
@@ -46,6 +47,7 @@ export default function EditProperty() {
           bathrooms: data.bathrooms?.toString() || '',
           city: data.city,
           address: data.address,
+          is_published: data.is_published,
         });
         setExistingImages(data.image_urls || []);
       }
@@ -101,6 +103,41 @@ export default function EditProperty() {
     ), { duration: Infinity, position: 'top-center' });
   };
 
+  const deleteProperty = async () => {
+    toast((t) => (
+      <div className="p-2">
+        <p className="font-bold text-sm text-gray-900 mb-4">¿Estás seguro de que quieres eliminar esta propiedad permanentemente?</p>
+        <div className="flex justify-end gap-2">
+          <button 
+            type="button"
+            onClick={() => toast.dismiss(t.id)} 
+            className="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 rounded text-xs font-medium text-gray-800 transition-colors"
+          >
+            Cancelar
+          </button>
+          <button 
+            type="button"
+            onClick={async () => {
+              toast.dismiss(t.id);
+              setLoading(true);
+              const { error } = await supabase.from('properties').delete().eq('id', id);
+              if (error) {
+                toast.error('Error al eliminar: ' + error.message);
+                setLoading(false);
+              } else {
+                toast.success('Propiedad eliminada correctamente');
+                router.push('/admin');
+              }
+            }} 
+            className="px-3 py-1.5 bg-red-500 hover:bg-red-600 rounded text-xs font-medium text-white transition-colors"
+          >
+            Sí, eliminar
+          </button>
+        </div>
+      </div>
+    ), { duration: Infinity, position: 'top-center' });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -146,6 +183,7 @@ export default function EditProperty() {
         bathrooms: parseInt(formData.bathrooms) || 0,
         city: formData.city,
         address: formData.address,
+        is_published: formData.is_published,
         image_urls: uploadedUrls, // Final ordered URLs
       }).eq('id', id);
 
@@ -235,6 +273,21 @@ export default function EditProperty() {
             <textarea required rows={4} name="description" value={formData.description} onChange={handleChange} className="w-full px-4 py-2 rounded-md border border-primary-300 dark:border-primary-700 bg-white dark:bg-primary-900 text-primary-900 dark:text-white focus:ring-2 focus:ring-primary-500 outline-none" />
           </div>
 
+          <div className="col-span-1 md:col-span-2">
+            <label className="flex items-center space-x-3 cursor-pointer p-4 bg-primary-50 dark:bg-primary-900 rounded-lg border border-primary-200 dark:border-primary-700 hover:bg-primary-100 dark:hover:bg-primary-800 transition-colors">
+              <input 
+                type="checkbox" 
+                checked={formData.is_published} 
+                onChange={(e) => setFormData({ ...formData, is_published: e.target.checked })}
+                className="w-5 h-5 text-accent border-gray-300 rounded focus:ring-accent accent-accent"
+              />
+              <span className="text-sm font-bold text-primary-900 dark:text-primary-200">
+                Propiedad Pública (Visible en la web para los clientes)
+              </span>
+            </label>
+            <p className="text-xs text-primary-500 mt-2 ml-1">Si desmarcas esta opción, la propiedad quedará "Pausada" (guardada como borrador) y solo la verás tú en el panel de administrador.</p>
+          </div>
+
           {/* Image Management */}
           <div className="col-span-1 md:col-span-2 border-t border-primary-100 dark:border-primary-800 pt-6 mt-4">
             <h3 className="text-lg font-bold text-primary-900 dark:text-white mb-4">Gestión de Imágenes</h3>
@@ -268,13 +321,18 @@ export default function EditProperty() {
           </div>
         </div>
 
-        <div className="flex justify-end pt-4 border-t border-primary-100 dark:border-primary-800 space-x-4">
-          <button type="button" onClick={() => router.back()} className="px-6 py-2 text-primary-700 dark:text-primary-300 font-medium hover:bg-primary-50 dark:hover:bg-primary-900 rounded-md transition-colors">
-            Cancelar
+        <div className="flex flex-col-reverse sm:flex-row justify-between items-center pt-4 border-t border-primary-100 dark:border-primary-800 gap-4 sm:gap-0">
+          <button type="button" onClick={deleteProperty} className="w-full sm:w-auto px-6 py-2 text-red-500 font-medium hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md transition-colors border border-transparent hover:border-red-200 dark:hover:border-red-800">
+            Eliminar Propiedad
           </button>
-          <button type="submit" disabled={loading} className="px-6 py-2 bg-accent hover:bg-accent-hover text-white font-medium rounded-md transition-colors disabled:opacity-50">
-            {loading ? 'Guardando Cambios...' : 'Guardar Cambios'}
-          </button>
+          <div className="flex space-x-4 w-full sm:w-auto justify-end">
+            <button type="button" onClick={() => router.back()} className="px-6 py-2 text-primary-700 dark:text-primary-300 font-medium hover:bg-primary-50 dark:hover:bg-primary-900 rounded-md transition-colors">
+              Cancelar
+            </button>
+            <button type="submit" disabled={loading} className="px-6 py-2 bg-accent hover:bg-accent-hover text-white font-medium rounded-md transition-colors disabled:opacity-50 whitespace-nowrap">
+              {loading ? 'Guardando...' : 'Guardar Cambios'}
+            </button>
+          </div>
         </div>
       </form>
     </div>
