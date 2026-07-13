@@ -23,6 +23,7 @@ export default function NewProperty() {
     bathrooms: '',
     city: '',
     address: '',
+    is_published: true,
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
@@ -81,8 +82,8 @@ export default function NewProperty() {
           bathrooms: parseInt(formData.bathrooms) || 0,
           city: formData.city,
           address: formData.address,
-          image_urls: uploadedUrls,
-          is_published: true
+          is_published: formData.is_published,
+          image_urls: uploadedUrls
         }
       ]);
 
@@ -169,6 +170,21 @@ export default function NewProperty() {
           <div className="col-span-1 md:col-span-2">
             <label className="block text-sm font-medium text-primary-900 dark:text-primary-200 mb-1">Descripción</label>
             <textarea required rows={4} name="description" value={formData.description} onChange={handleChange} className="w-full px-4 py-2 rounded-md border border-primary-300 dark:border-primary-700 bg-white dark:bg-primary-900 text-primary-900 dark:text-white focus:ring-2 focus:ring-primary-500 outline-none" placeholder="Describe las características principales..." />
+          </div>
+
+          <div className="col-span-1 md:col-span-2">
+            <label className="flex items-center space-x-3 cursor-pointer p-4 bg-primary-50 dark:bg-primary-900 rounded-lg border border-primary-200 dark:border-primary-700 hover:bg-primary-100 dark:hover:bg-primary-800 transition-colors">
+              <input 
+                type="checkbox" 
+                checked={formData.is_published} 
+                onChange={(e) => setFormData({ ...formData, is_published: e.target.checked })}
+                className="w-5 h-5 text-accent border-gray-300 rounded focus:ring-accent accent-accent"
+              />
+              <span className="text-sm font-bold text-primary-900 dark:text-primary-200">
+                Publicar Inmediatamente (Visible en la web para los clientes)
+              </span>
+            </label>
+            <p className="text-xs text-primary-500 mt-2 ml-1">Si desmarcas esta opción, la propiedad se guardará como un "Borrador" pausado y solo la verás tú en el panel.</p>
           </div>
 
           <div className="col-span-1 md:col-span-2">
