@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabase';
+import { Metadata } from 'next';
 import Navbar from '@/components/Navbar';
 import Link from 'next/link';
 import ContactForm from '@/components/ContactForm';
@@ -6,11 +7,51 @@ import BackButton from '@/components/BackButton';
 import WhatsAppButton from '@/components/WhatsAppButton';
 import ImageGallery from '@/components/ImageGallery';
 import FavoriteButton from '@/components/FavoriteButton';
+import DownloadPDFButton from '@/components/DownloadPDFButton';
 
 export const revalidate = 0;
 
-export default async function PropertyDetails({ params }: { params: Promise<{ id: string }> }) {
+type Props = {
+  params: Promise<{ id: string }>
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
+  
+  const { data: property } = await supabase
+    .from('properties')
+    .select('title, operation_type, property_type, city, bedrooms, currency, price, image_urls')
+    .eq('id', id)
+    .single();
+
+  if (!property) {
+    return { title: 'Propiedad no encontrada | Inmobiout' };
+  }
+
+  const title = `${property.title} | ${property.operation_type.toUpperCase()}`;
+  const description = `${property.property_type.toUpperCase()} en ${property.city}. ${property.bedrooms > 0 ? property.bedrooms + ' hab. ' : ''}${property.currency === 'ARS' ? '$' : 'US$'} ${property.price.toLocaleString()}`;
+  const images = property.image_urls && property.image_urls.length > 0 ? [property.image_urls[0]] : [];
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      images,
+      type: 'website',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      images,
+    },
+  };
+}
+
+export default async function PropertyDetails(props: Props) {
+  const { id } = await props.params;
 
   const { data: property } = await supabase
     .from('properties')
@@ -36,9 +77,11 @@ export default async function PropertyDetails({ params }: { params: Promise<{ id
     <main className="flex min-h-screen flex-col bg-background">
       <Navbar />
       
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 w-full">
-        <BackButton fallback="/" />
-        
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+        <div className="flex justify-between items-center mb-6">
+          <BackButton fallback="/" />
+          <DownloadPDFButton property={property} />
+        </div>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
           {/* Images Section */}
           <div className="w-full">
@@ -93,6 +136,21 @@ export default async function PropertyDetails({ params }: { params: Promise<{ id
               <p className="text-primary-700 dark:text-primary-300 whitespace-pre-line leading-relaxed">
                 {property.description}
               </p>
+            </div>
+
+            <div className="mb-8">
+              <h3 className="text-xl font-bold text-primary-900 dark:text-white mb-4">Ubicación</h3>
+              <div className="w-full h-64 rounded-xl overflow-hidden shadow-sm border border-primary-100 dark:border-primary-800 relative bg-primary-100 dark:bg-primary-900">
+                <iframe
+                  width="100%"
+                  height="100%"
+                  style={{ border: 0 }}
+                  loading="lazy"
+                  allowFullScreen
+                  referrerPolicy="no-referrer-when-downgrade"
+                  src={`https://www.google.com/maps?q=${encodeURIComponent(property.address + ', ' + property.city)}&output=embed`}
+                ></iframe>
+              </div>
             </div>
             
             <ContactForm propertyId={property.id} />
