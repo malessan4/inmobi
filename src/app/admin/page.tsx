@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import Link from 'next/link';
 import { toast } from 'react-hot-toast';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 
 type Property = {
   id: string;
@@ -17,6 +18,7 @@ type Property = {
 
 export default function AdminDashboard() {
   const [properties, setProperties] = useState<Property[]>([]);
+  const [leadsCount, setLeadsCount] = useState(0);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -31,6 +33,13 @@ export default function AdminDashboard() {
       .order('created_at', { ascending: false });
       
     if (data) setProperties(data);
+
+    const { count } = await supabase
+      .from('leads')
+      .select('*', { count: 'exact', head: true });
+      
+    if (count !== null) setLeadsCount(count);
+
     setLoading(false);
   }
 
@@ -86,6 +95,51 @@ export default function AdminDashboard() {
           + Nueva Propiedad
         </Link>
       </div>
+
+      {!loading && (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <div className="bg-white dark:bg-primary-950 p-6 rounded-lg shadow-sm border border-primary-100 dark:border-primary-900">
+            <p className="text-primary-500 text-sm font-semibold uppercase tracking-wider mb-1">Total Propiedades</p>
+            <p className="text-4xl font-bold text-primary-900 dark:text-white">{properties.length}</p>
+          </div>
+          <div className="bg-white dark:bg-primary-950 p-6 rounded-lg shadow-sm border border-primary-100 dark:border-primary-900">
+            <p className="text-primary-500 text-sm font-semibold uppercase tracking-wider mb-1">Activas (Públicas)</p>
+            <p className="text-4xl font-bold text-green-600 dark:text-green-400">{properties.filter(p => p.is_published).length}</p>
+          </div>
+          <div className="bg-white dark:bg-primary-950 p-6 rounded-lg shadow-sm border border-primary-100 dark:border-primary-900">
+            <p className="text-primary-500 text-sm font-semibold uppercase tracking-wider mb-1">Total Leads (Contactos)</p>
+            <p className="text-4xl font-bold text-accent">{leadsCount}</p>
+          </div>
+        </div>
+      )}
+
+      {!loading && properties.length > 0 && (
+        <div className="bg-white dark:bg-primary-950 p-6 rounded-lg shadow-sm border border-primary-100 dark:border-primary-900 mb-8">
+          <h2 className="text-xl font-bold text-primary-900 dark:text-white mb-6">Inventario por Tipo de Inmueble</h2>
+          <div className="h-64 w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart
+                data={[
+                  { name: 'Casas', cantidad: properties.filter(p => p.property_type === 'casa').length },
+                  { name: 'Deptos', cantidad: properties.filter(p => p.property_type === 'departamento').length },
+                  { name: 'Terrenos', cantidad: properties.filter(p => p.property_type === 'terreno').length },
+                  { name: 'Comercial', cantidad: properties.filter(p => p.property_type === 'comercial').length },
+                ].filter(d => d.cantidad > 0)}
+                margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" opacity={0.2} vertical={false} />
+                <XAxis dataKey="name" tick={{fill: '#888'}} axisLine={false} tickLine={false} />
+                <YAxis allowDecimals={false} tick={{fill: '#888'}} axisLine={false} tickLine={false} />
+                <Tooltip 
+                  cursor={{fill: '#f3f4f6'}}
+                  contentStyle={{borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'}} 
+                />
+                <Bar dataKey="cantidad" fill="#f97316" radius={[4, 4, 0, 0]} maxBarSize={60} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+      )}
 
       <div className="bg-white dark:bg-primary-950 rounded-lg shadow-sm border border-primary-100 dark:border-primary-900 overflow-hidden overflow-x-auto">
         {loading ? (
