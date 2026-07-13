@@ -35,7 +35,7 @@ export default function AdminLogin() {
     <div className="min-h-screen flex items-center justify-center bg-background px-4">
       <div className="max-w-md w-full bg-white dark:bg-primary-950 p-8 rounded-lg shadow-xl border border-primary-100 dark:border-primary-900 relative">
         <div className="absolute -top-16 left-0">
-          <BackButton fallback="/" />
+          <BackButton fallback="/" forceFallback={true} />
         </div>
         <div className="text-center mb-8">
           <h2 className="text-2xl font-bold text-primary-900 dark:text-white">Acceso Administrador</h2>
