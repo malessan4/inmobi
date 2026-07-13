@@ -10,6 +10,8 @@ export default function FilterBar() {
   const [query, setQuery] = useState(searchParams.get('q') || '');
   const [operationType, setOperationType] = useState(searchParams.get('operation') || '');
   const [propertyType, setPropertyType] = useState(searchParams.get('type') || '');
+  const [bedrooms, setBedrooms] = useState(searchParams.get('bedrooms') || '');
+  const [sort, setSort] = useState(searchParams.get('sort') || '');
 
   const handleSearch = (e: FormEvent) => {
     e.preventDefault();
@@ -17,6 +19,8 @@ export default function FilterBar() {
     if (query) params.set('q', query);
     if (operationType) params.set('operation', operationType);
     if (propertyType) params.set('type', propertyType);
+    if (bedrooms) params.set('bedrooms', bedrooms);
+    if (sort) params.set('sort', sort);
 
     router.push(`/?${params.toString()}`);
   };
@@ -25,10 +29,12 @@ export default function FilterBar() {
     setQuery('');
     setOperationType('');
     setPropertyType('');
+    setBedrooms('');
+    setSort('');
     router.push('/');
   };
 
-  const hasFilters = query || operationType || propertyType;
+  const hasFilters = query || operationType || propertyType || bedrooms || sort;
 
   return (
     <form onSubmit={handleSearch} className="bg-white dark:bg-primary-950 p-4 rounded-xl shadow-md border border-primary-100 dark:border-primary-900 flex flex-col md:flex-row gap-4 mb-8">
@@ -74,6 +80,33 @@ export default function FilterBar() {
           <option value="departamento">Departamento</option>
           <option value="terreno">Terreno</option>
           <option value="comercial">Comercial</option>
+        </select>
+      </div>
+
+      <div className="w-full md:w-32">
+        <select
+          value={bedrooms}
+          onChange={(e) => setBedrooms(e.target.value)}
+          className="block w-full px-3 py-3 border border-primary-300 dark:border-primary-700 rounded-lg bg-primary-50 dark:bg-primary-900 text-primary-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-accent appearance-none cursor-pointer"
+        >
+          <option value="">Habitaciones</option>
+          <option value="1">1+ Hab</option>
+          <option value="2">2+ Hab</option>
+          <option value="3">3+ Hab</option>
+          <option value="4">4+ Hab</option>
+        </select>
+      </div>
+
+      <div className="w-full md:w-48">
+        <select
+          value={sort}
+          onChange={(e) => setSort(e.target.value)}
+          className="block w-full px-3 py-3 border border-primary-300 dark:border-primary-700 rounded-lg bg-primary-50 dark:bg-primary-900 text-primary-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-accent appearance-none cursor-pointer"
+        >
+          <option value="">Ordenar por</option>
+          <option value="price_asc">Menor Precio</option>
+          <option value="price_desc">Mayor Precio</option>
+          <option value="newest">Más Recientes</option>
         </select>
       </div>
 
