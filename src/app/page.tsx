@@ -13,6 +13,8 @@ export default async function Home(props: { searchParams: Promise<{ [key: string
   const q = typeof searchParams.q === 'string' ? searchParams.q : '';
   const operation = typeof searchParams.operation === 'string' ? searchParams.operation : '';
   const propertyType = typeof searchParams.type === 'string' ? searchParams.type : '';
+  const bedrooms = typeof searchParams.bedrooms === 'string' ? parseInt(searchParams.bedrooms) : 0;
+  const sort = typeof searchParams.sort === 'string' ? searchParams.sort : 'newest';
 
   let query = supabase
     .from('properties')
@@ -28,8 +30,19 @@ export default async function Home(props: { searchParams: Promise<{ [key: string
   if (propertyType) {
     query = query.eq('property_type', propertyType);
   }
+  if (bedrooms > 0) {
+    query = query.gte('bedrooms', bedrooms);
+  }
 
-  const { data: properties } = await query.order('created_at', { ascending: false });
+  if (sort === 'price_asc') {
+    query = query.order('price', { ascending: true });
+  } else if (sort === 'price_desc') {
+    query = query.order('price', { ascending: false });
+  } else {
+    query = query.order('created_at', { ascending: false });
+  }
+
+  const { data: properties } = await query;
 
   return (
     <main className="flex min-h-screen flex-col bg-background">
