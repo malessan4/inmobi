@@ -4,7 +4,6 @@ import Navbar from '@/components/Navbar';
 import Link from 'next/link';
 import ContactForm from '@/components/ContactForm';
 import BackButton from '@/components/BackButton';
-import WhatsAppButton from '@/components/WhatsAppButton';
 import ImageGallery from '@/components/ImageGallery';
 import FavoriteButton from '@/components/FavoriteButton';
 import DownloadPDFButton from '@/components/DownloadPDFButton';
@@ -66,7 +65,7 @@ export default async function PropertyDetails(props: Props) {
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center">
             <h1 className="text-2xl font-bold text-primary-900 mb-4">Propiedad no encontrada</h1>
-            <Link href="/" className="text-accent hover:underline">Volver al inicio</Link>
+            <Link href="/propiedades" className="text-accent hover:underline">Volver al inicio</Link>
           </div>
         </div>
       </main>
@@ -157,7 +156,6 @@ export default async function PropertyDetails(props: Props) {
           </div>
         </div>
       </div>
-      <WhatsAppButton propertyTitle={property.title} />
     </main>
   );
 }
