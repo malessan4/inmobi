@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { toast } from 'react-hot-toast';
 import Navbar from '@/components/Navbar';
+import ThemeToggle from '@/components/ThemeToggle';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -46,8 +47,18 @@ export default function LoginPage() {
     <main className="min-h-screen flex flex-col bg-background">
       <Navbar />
       <div className="flex-1 flex items-center justify-center p-4">
-        <div className="w-full max-w-md bg-white dark:bg-primary-950 p-8 rounded-xl shadow-lg border border-primary-100 dark:border-primary-900">
-          <h1 className="text-2xl font-bold text-primary-900 dark:text-white text-center mb-6">Iniciar Sesión</h1>
+        <div className="w-full max-w-md">
+
+          {/* Volver al inicio */}
+          <Link href="/" className="inline-flex items-center gap-2 text-sm text-primary-600 dark:text-primary-400 hover:text-accent mb-4 font-medium transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+            </svg>
+            Volver al inicio
+          </Link>
+
+          <div className="bg-white dark:bg-primary-950 p-8 rounded-xl shadow-lg border border-primary-100 dark:border-primary-900">
+            <h1 className="text-2xl font-bold text-primary-900 dark:text-white text-center mb-6">Iniciar Sesión</h1>
           
           <button 
             onClick={handleGoogleLogin}
@@ -106,6 +117,7 @@ export default function LoginPage() {
           <p className="mt-6 text-center text-sm text-primary-600 dark:text-primary-400">
             ¿No tienes cuenta? <Link href="/register" className="text-accent hover:underline font-bold">Regístrate gratis</Link>
           </p>
+          </div>
         </div>
       </div>
     </main>
