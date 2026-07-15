@@ -17,10 +17,10 @@ export default function Navbar() {
           </div>
           
           <div className="hidden md:flex space-x-8 items-center">
-            <Link href="/?operation=venta" className="text-primary-700 hover:text-accent dark:text-primary-200 dark:hover:text-accent-hover font-medium transition-colors">
+            <Link href="/propiedades?operation=venta" className="text-primary-700 hover:text-accent dark:text-primary-200 dark:hover:text-accent-hover font-medium transition-colors">
               En Venta
             </Link>
-            <Link href="/?operation=alquiler" className="text-primary-700 hover:text-accent dark:text-primary-200 dark:hover:text-accent-hover font-medium transition-colors">
+            <Link href="/propiedades?operation=alquiler" className="text-primary-700 hover:text-accent dark:text-primary-200 dark:hover:text-accent-hover font-medium transition-colors">
               Alquileres
             </Link>
           </div>
@@ -33,12 +33,20 @@ export default function Navbar() {
               <span className="hidden md:inline">Favoritos</span>
             </Link>
             <ThemeToggle />
-            <Link 
-              href="/admin" 
-              className="px-4 py-2 text-sm font-medium text-white bg-primary-800 hover:bg-primary-900 dark:bg-primary-700 dark:hover:bg-primary-600 rounded-md transition-colors shadow-sm"
-            >
-              Acceso Inmobiliarias
-            </Link>
+            <div className="flex flex-col md:flex-row gap-2">
+              <Link 
+                href="/login" 
+                className="px-4 py-2 text-sm font-medium text-primary-900 dark:text-white border border-primary-200 dark:border-primary-700 hover:bg-primary-50 dark:hover:bg-primary-800 rounded-md transition-colors shadow-sm"
+              >
+                Ingreso Cliente
+              </Link>
+              <Link 
+                href="/admin/login" 
+                className="px-4 py-2 text-sm font-medium text-white bg-primary-800 hover:bg-primary-900 dark:bg-primary-700 dark:hover:bg-primary-600 rounded-md transition-colors shadow-sm"
+              >
+                Ingreso Inmobiliaria
+              </Link>
+            </div>
           </div>
         </div>
       </div>
