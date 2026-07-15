@@ -1,124 +1,71 @@
-import Navbar from '@/components/Navbar';
-import Hero from '@/components/Hero';
-import { supabase } from '@/lib/supabase';
-import Image from 'next/image';
 import Link from 'next/link';
-import FilterBar from '@/components/FilterBar';
-import FavoriteButton from '@/components/FavoriteButton';
 
-export const revalidate = 0; // Disable cache for MVP so new properties show up immediately
-
-export default async function Home(props: { searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) {
-  const searchParams = await props.searchParams;
-  const q = typeof searchParams.q === 'string' ? searchParams.q : '';
-  const operation = typeof searchParams.operation === 'string' ? searchParams.operation : '';
-  const propertyType = typeof searchParams.type === 'string' ? searchParams.type : '';
-  const bedrooms = typeof searchParams.bedrooms === 'string' ? parseInt(searchParams.bedrooms) : 0;
-  const sort = typeof searchParams.sort === 'string' ? searchParams.sort : 'newest';
-
-  let query = supabase
-    .from('properties')
-    .select('*')
-    .eq('is_published', true);
-
-  if (q) {
-    query = query.or(`title.ilike.%${q}%,city.ilike.%${q}%,address.ilike.%${q}%`);
-  }
-  if (operation) {
-    query = query.eq('operation_type', operation);
-  }
-  if (propertyType) {
-    query = query.eq('property_type', propertyType);
-  }
-  if (bedrooms > 0) {
-    query = query.gte('bedrooms', bedrooms);
-  }
-
-  if (sort === 'price_asc') {
-    query = query.order('price', { ascending: true });
-  } else if (sort === 'price_desc') {
-    query = query.order('price', { ascending: false });
-  } else {
-    query = query.order('created_at', { ascending: false });
-  }
-
-  const { data: properties } = await query;
-
+export default function WelcomePage() {
   return (
-    <main className="flex min-h-screen flex-col bg-background">
-      <Navbar />
-      <Hero />
-      
-      <section className="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
-        <div className="flex justify-between items-end mb-12">
-          <div>
-            <h2 className="text-3xl font-bold text-primary-900 dark:text-white">Propiedades Destacadas</h2>
-            <p className="mt-2 text-primary-600 dark:text-primary-300">Descubre las mejores oportunidades del mercado</p>
+    <div className="min-h-[calc(100vh-4rem)] flex flex-col items-center justify-center bg-background p-4 relative overflow-hidden">
+      {/* Background Decorative Elements */}
+      <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-accent/20 rounded-full blur-3xl opacity-50 mix-blend-multiply"></div>
+      <div className="absolute bottom-[-10%] right-[-10%] w-96 h-96 bg-blue-500/20 rounded-full blur-3xl opacity-50 mix-blend-multiply"></div>
+
+      <div className="relative z-10 text-center max-w-3xl mx-auto space-y-8 bg-white/80 dark:bg-primary-950/80 p-12 rounded-3xl shadow-xl backdrop-blur-sm border border-primary-100 dark:border-primary-900">
+        
+        <div className="flex justify-center mb-6">
+          <div className="flex items-center gap-3">
+            <img src="/logo.jpg" alt="Inmobiout Logo" className="h-16 w-16 rounded-xl object-cover shadow-md" />
+            <span className="font-bold text-5xl text-primary-900 dark:text-white tracking-tight">
+              Inmobi<span className="text-accent">out</span>
+            </span>
           </div>
         </div>
 
-        <FilterBar />
-        
-        {(!properties || properties.length === 0) ? (
-          <div className="text-center p-10 border border-primary-200 dark:border-primary-800 rounded-lg text-primary-500">
-            Aún no hay propiedades publicadas.
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {properties.map((property) => (
-              <Link href={`/property/${property.id}`} key={property.id} className="bg-white dark:bg-primary-950 rounded-xl shadow-md overflow-hidden border border-primary-100 dark:border-primary-900 hover:shadow-lg transition-shadow group cursor-pointer block">
-                <div className="relative h-64 w-full bg-primary-100 dark:bg-primary-900 overflow-hidden">
-                  {property.image_urls && property.image_urls.length > 0 ? (
-                    <img 
-                      src={property.image_urls[0]} 
-                      alt={property.title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-primary-400">Sin imagen</div>
-                  )}
-                  <div className="absolute top-4 left-4">
-                    <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${
-                      property.operation_type === 'venta' 
-                        ? 'bg-green-500 text-white' 
-                        : 'bg-blue-500 text-white'
-                    }`}>
-                      {property.operation_type}
-                    </span>
-                  </div>
-                  <div className="absolute top-4 right-4 z-10">
-                    <FavoriteButton propertyId={property.id} />
-                  </div>
-                </div>
-                
-                <div className="p-6">
-                  <div className="flex justify-between items-start mb-2">
-                    <p className="text-sm font-medium text-accent uppercase tracking-wider">{property.property_type}</p>
-                    <p className="text-xl font-bold text-primary-900 dark:text-white">
-                      {property.currency === 'ARS' ? '$' : 'US$'} {property.price.toLocaleString()}
-                    </p>
-                  </div>
-                  <h3 className="text-lg font-bold text-primary-900 dark:text-white mb-2 line-clamp-1">
-                    {property.title}
-                  </h3>
-                  <p className="text-primary-500 text-sm mb-4 flex items-center gap-1">
-                    📍 {property.city} - {property.address}
-                  </p>
-                  
-                  <div className="flex items-center gap-4 text-sm text-primary-600 dark:text-primary-400 border-t border-primary-100 dark:border-primary-800 pt-4">
-                    {property.bedrooms > 0 && (
-                      <span className="flex items-center gap-1">🛏️ {property.bedrooms} Hab</span>
-                    )}
-                    {property.bathrooms > 0 && (
-                      <span className="flex items-center gap-1">🚿 {property.bathrooms} Baños</span>
-                    )}
-                  </div>
-                </div>
-              </Link>
-            ))}
-          </div>
-        )}
-      </section>
-    </main>
+        <h1 className="text-4xl md:text-5xl font-extrabold text-primary-900 dark:text-white leading-tight">
+          Bienvenido al Portal Inmobiliario
+        </h1>
+        <p className="text-xl text-primary-600 dark:text-primary-400 max-w-2xl mx-auto">
+          Selecciona cómo deseas ingresar a nuestra plataforma para disfrutar de la mejor experiencia.
+        </p>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-8 max-w-2xl mx-auto">
+          {/* Botón Cliente */}
+          <Link 
+            href="/login" 
+            className="group flex flex-col items-center p-8 bg-white dark:bg-primary-900 rounded-2xl shadow-sm border border-primary-200 dark:border-primary-800 hover:border-accent hover:shadow-lg transition-all duration-300"
+          >
+            <div className="w-16 h-16 bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-8">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+              </svg>
+            </div>
+            <h3 className="text-xl font-bold text-primary-900 dark:text-white mb-2">Soy Cliente</h3>
+            <p className="text-sm text-primary-500 text-center">Busco comprar o alquilar una propiedad.</p>
+          </Link>
+
+          {/* Botón Inmobiliaria */}
+          <Link 
+            href="/admin/login" 
+            className="group flex flex-col items-center p-8 bg-white dark:bg-primary-900 rounded-2xl shadow-sm border border-primary-200 dark:border-primary-800 hover:border-accent hover:shadow-lg transition-all duration-300"
+          >
+            <div className="w-16 h-16 bg-accent/10 dark:bg-accent/20 text-accent rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-8">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21M3 3h12m-.75 4.5H21m-3.75 3.75h.008v.008h-.008v-.008zm0 3h.008v.008h-.008v-.008zm0 3h.008v.008h-.008v-.008z" />
+              </svg>
+            </div>
+            <h3 className="text-xl font-bold text-primary-900 dark:text-white mb-2">Soy Inmobiliaria</h3>
+            <p className="text-sm text-primary-500 text-center">Quiero gestionar mis publicaciones.</p>
+          </Link>
+        </div>
+
+        <div className="pt-8 flex flex-col items-center border-t border-primary-100 dark:border-primary-800/50 mt-8">
+          <p className="text-primary-600 dark:text-primary-400 mb-4 font-medium">¿Solo quieres mirar?</p>
+          <Link 
+            href="/propiedades" 
+            className="px-8 py-3 bg-primary-100 dark:bg-primary-800 text-primary-900 dark:text-white font-bold rounded-full hover:bg-primary-200 dark:hover:bg-primary-700 transition-colors shadow-sm"
+          >
+            Explorar sin Iniciar Sesión
+          </Link>
+        </div>
+
+      </div>
+    </div>
   );
 }
