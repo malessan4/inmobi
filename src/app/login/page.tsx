@@ -27,7 +27,7 @@ export default function LoginPage() {
       setLoading(false);
     } else {
       toast.success('¡Sesión iniciada con éxito!');
-      router.push('/');
+      router.push('/propiedades');
     }
   };
 
@@ -35,7 +35,7 @@ export default function LoginPage() {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${window.location.origin}/`,
+        redirectTo: `${window.location.origin}/propiedades`,
       }
     });
     
