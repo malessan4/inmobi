@@ -1,18 +1,41 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'react-hot-toast';
+import Link from 'next/link';
 
 export default function ContactForm({ propertyId }: { propertyId: string }) {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [session, setSession] = useState<any>(null);
+  const [checkingAuth, setCheckingAuth] = useState(true);
+
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     phone: '',
     message: ''
   });
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      if (session?.user) {
+        setFormData(prev => ({ ...prev, email: session.user.email || '' }));
+      }
+      setCheckingAuth(false);
+    });
+
+    const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+      if (session?.user) {
+        setFormData(prev => ({ ...prev, email: session.user.email || '' }));
+      }
+    });
+    
+    return () => authListener.subscription.unsubscribe();
+  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -58,6 +81,29 @@ export default function ContactForm({ propertyId }: { propertyId: string }) {
         >
           Enviar otro mensaje
         </button>
+      </div>
+    );
+  }
+
+  if (checkingAuth) {
+    return (
+      <div className="bg-primary-50 dark:bg-primary-900 p-6 rounded-xl border border-primary-100 dark:border-primary-800 animate-pulse h-64 flex items-center justify-center">
+        <span className="text-primary-500">Cargando...</span>
+      </div>
+    );
+  }
+
+  if (!session) {
+    return (
+      <div className="bg-primary-50 dark:bg-primary-900 p-8 rounded-xl border border-primary-100 dark:border-primary-800 text-center">
+        <h3 className="text-xl font-bold text-primary-900 dark:text-white mb-3">¿Te interesa esta propiedad?</h3>
+        <p className="text-primary-600 dark:text-primary-400 mb-6">Para poder contactar con la inmobiliaria debes iniciar sesión o crear una cuenta gratuita.</p>
+        <Link 
+          href="/login" 
+          className="inline-block w-full py-3 bg-accent hover:bg-accent-hover text-white font-bold rounded-lg transition-colors shadow-sm"
+        >
+          Iniciar Sesión para Contactar
+        </Link>
       </div>
     );
   }
