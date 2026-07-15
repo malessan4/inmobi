@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { supabase } from '@/lib/supabase';
 
 type WhatsAppButtonProps = {
   propertyTitle: string;
@@ -8,14 +9,20 @@ type WhatsAppButtonProps = {
 
 export default function WhatsAppButton({ propertyTitle }: WhatsAppButtonProps) {
   const [currentUrl, setCurrentUrl] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('5491100000000');
 
   useEffect(() => {
     // Only access window in the client to avoid SSR issues
     setCurrentUrl(window.location.href);
-  }, []);
 
-  // Use the env variable, or a dummy one if not set
-  const phoneNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '5491100000000';
+    // Fetch phone number from settings
+    supabase.from('settings').select('contact_phone').eq('id', 1).single()
+      .then(({ data }) => {
+        if (data?.contact_phone) {
+          setPhoneNumber(data.contact_phone);
+        }
+      });
+  }, []);
   
   const message = `Hola, me interesa la propiedad "${propertyTitle}" que vi en su web. ${currentUrl ? `Puedes verla aquí: ${currentUrl}` : ''}`;
   const encodedMessage = encodeURIComponent(message);
