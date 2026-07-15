@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
+import { toast } from 'react-hot-toast';
 import ThemeToggle from '@/components/ThemeToggle';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -17,6 +18,20 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       const { data: { session } } = await supabase.auth.getSession();
       if (!session && pathname !== '/admin/login') {
         router.push('/admin/login');
+      } else if (session && pathname !== '/admin/login') {
+        // Verificar si es administrador
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', session.user.id)
+          .single();
+          
+        if (profile?.role !== 'admin') {
+          toast.error('Acceso denegado: No eres administrador.');
+          router.push('/');
+        } else {
+          setLoading(false);
+        }
       } else {
         setLoading(false);
       }
@@ -71,6 +86,16 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               }`}
             >
               👥 Mis Contactos
+            </Link>
+            <Link 
+              href="/admin/settings" 
+              className={`block px-4 py-3 rounded-lg font-medium transition-colors ${
+                pathname.startsWith('/admin/settings')
+                  ? 'bg-accent text-white shadow-md' 
+                  : 'text-primary-600 dark:text-primary-400 hover:bg-primary-100 dark:hover:bg-primary-800'
+              }`}
+            >
+              ⚙️ Configuración
             </Link>
           </nav>
         <div className="p-4 border-t border-primary-800">
@@ -129,6 +154,17 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 }`}
               >
                 👥 Mis Contactos
+              </Link>
+              <Link 
+                href="/admin/settings" 
+                onClick={() => setIsMobileMenuOpen(false)}
+                className={`block px-4 py-3 rounded-lg font-medium transition-colors ${
+                  pathname.startsWith('/admin/settings')
+                    ? 'bg-accent text-white shadow-md' 
+                    : 'text-primary-600 dark:text-primary-400 hover:bg-primary-100 dark:hover:bg-primary-800'
+                }`}
+              >
+                ⚙️ Configuración
               </Link>
             </nav>
           </div>
